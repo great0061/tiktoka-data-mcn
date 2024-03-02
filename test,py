@@ -1,0 +1,79 @@
+from selenium import webdriver
+from google.oauth2.service_account import Credentials
+import gspread
+from humanfriendly import parse_size
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+# import google.auth
+from googleapiclient.errors import HttpError
+from googleapiclient.discovery import build
+scopes = [
+    'https://www.googleapis.com/auth/spreadsheets',
+    'https://www.googleapis.com/auth/drive'
+]
+
+likes=[]
+comments=[]
+saves=[]
+shares=[]
+def sheets_batch_update(spreadsheet_id, title, find, replacement):
+  """
+  Update the sheet details in batch, the user has access to.
+  Load pre-authorized user credentials from the environment.
+  TODO(developer) - See https://developers.google.com/identity
+  for guides on implementing OAuth2 for the application.
+  """
+  creds = Credentials.from_service_account_file(r'C:\\Users\\Lenovo\\Desktop\\code\\tiktoka-data-mcn\\modular-tube-412013-666981a759e4.json')
+  # creds, _ = google.auth.default()
+  # pylint: disable=maybe-no-member
+
+  try:
+    service = build("sheets", "v4", credentials=creds)
+
+    requests = []
+    # Change the spreadsheet's title.
+    requests.append(
+        {
+            "updateSpreadsheetProperties": {
+                "properties": {"title": title},
+                "fields": "title",
+            }
+        }
+    )
+    # Find and replace text
+    requests.append(
+        {
+            "findReplace": {
+                "find": find,
+                "replacement": replacement,
+                "allSheets": True,
+            }
+        }
+    )
+    # Add additional requests (operations) ...
+
+    body = {"requests": requests}
+    response = (
+        service.spreadsheets()
+        .batchUpdate(spreadsheetId=spreadsheet_id, body=body)
+        .execute()
+    )
+    find_replace_response = response.get("replies")[1].get("findReplace")
+    print(
+        f"{find_replace_response.get('occurrencesChanged')} replacements made."
+    )
+    return response
+
+  except HttpError as error:
+    print(f"An error occurred: {error}")
+    return error
+
+
+if __name__ == "__main__":
+  sheets_batch_update("1zZFqgrN6A4JNIlftQgpbyMHBZFWsU7LpL_BBrwQxu6E", "batch", "aa", "bb")
+
+# gc = gspread.service_account_from_dict(credentials)
+# sht2 = gc.open_by_url('https://docs.google.com/spreadsheets/d/1zZFqgrN6A4JNIlftQgpbyMHBZFWsU7LpL_BBrwQxu6E/edit?usp=sharing')
+# worksheet = sht2.get_worksheet(0)
+# # worksheet.update('B1', 'Bingo!')
+# worksheet.update('B1', 'Bingo!')

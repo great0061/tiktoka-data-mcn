@@ -1,17 +1,17 @@
 from selenium import webdriver
-from selenium.webdriver.common.by import By
 from google.oauth2.service_account import Credentials
 import gspread
 from humanfriendly import parse_size
-
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+import json
 scopes = [
     'https://www.googleapis.com/auth/spreadsheets',
     'https://www.googleapis.com/auth/drive'
 ]
 
-credentials = {
-
-}
+with open (r'C:\\Users\\Lenovo\\Desktop\\code\\tiktoka-data-mcn\\modular-tube-412013-666981a759e4.json') as f:
+    credentials = json.load(f)
 def dataTikTok(urls):
     likes=[]
     comments=[]
@@ -19,7 +19,7 @@ def dataTikTok(urls):
     shares=[]
 
     gc = gspread.service_account_from_dict(credentials)
-    sht2 = gc.open_by_url('https://docs.google.com/spreadsheets/d/1GQUWqbPpyxXNYpsDEC_5FDu_9OAaIq16Ch9i1tcmG-w/edit?usp=sharing')
+    sht2 = gc.open_by_url('https://docs.google.com/spreadsheets/d/1zZFqgrN6A4JNIlftQgpbyMHBZFWsU7LpL_BBrwQxu6E/edit?usp=sharing')
     worksheet = sht2.get_worksheet(0)
 
     for url in urls:
@@ -58,10 +58,14 @@ def dataTikTok(urls):
             shares.append(0)
 
     for index,like in enumerate(likes, start=6):
-        worksheet.update(f'C{index}', int(f'{like}')) #ตัว C คือ คอลัม / start = เริ่มต้นลงข้อมูลที่ Ex. แถว 6 ... เอาไว้แก้นะจ๊ะ
+        worksheet.update(f'C{index}', [[int(f'{like}')]]) #ตัว C คือ คอลัม / start = เริ่มต้นลงข้อมูลที่ Ex. แถว 6 ... เอาไว้แก้นะจ๊ะ     
     for index,comment in enumerate(comments, start=6):
-        worksheet.update(f'D{index}', int(f'{comment}'))
+        worksheet.update(f'D{index}', [[(f'{comment}')]])
     for index,save in enumerate(saves, start=6):
-        worksheet.update(f'E{index}', int(f'{save}'))
+        worksheet.update(f'E{index}', [[int(f'{save}')]])
     for index,share in enumerate(shares, start=6):
-        worksheet.update(f'F{index}', int(f'{share}'))
+        worksheet.update(f'F{index}', [[int(f'{share}')]])
+        
+
+    # worksheet.update('A1:B2', [[1, 2], [3, 4]])
+    # worksheet.update('D1',[["E"]])
